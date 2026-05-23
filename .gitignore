@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# Test / tooling cache
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Data / local runtime outputs
+data/
+logs/
+tmp/
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+*.tfvars
+
+# Airflow local runtime
+airflow/logs/
+airflow/plugins/__pycache__/
+
+# Snowflake / dbt
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+
+# Secrets
+*.pem
+*.key
