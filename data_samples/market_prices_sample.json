@@ -1,0 +1,64 @@
+{
+  "records": [
+    {
+      "symbol": "BTCUSD",
+      "price_timestamp": "2026-05-20T00:00:00Z",
+      "open_price": 68000.0,
+      "high_price": 69200.0,
+      "low_price": 67500.0,
+      "close_price": 68900.0,
+      "adjusted_close_price": 68900.0,
+      "volume": 120000.0
+    },
+    {
+      "symbol": "BTCUSD",
+      "price_timestamp": "2026-05-21T00:00:00Z",
+      "open_price": 68900.0,
+      "high_price": 70400.0,
+      "low_price": 68450.0,
+      "close_price": 70100.0,
+      "adjusted_close_price": 70100.0,
+      "volume": 135000.0
+    },
+    {
+      "symbol": "BTCUSD",
+      "price_timestamp": "2026-05-22T00:00:00Z",
+      "open_price": 70100.0,
+      "high_price": 70850.0,
+      "low_price": 69500.0,
+      "close_price": 69950.0,
+      "adjusted_close_price": 69950.0,
+      "volume": 128500.0
+    },
+    {
+      "symbol": "QQQ",
+      "price_timestamp": "2026-05-20T00:00:00Z",
+      "open_price": 445.0,
+      "high_price": 449.5,
+      "low_price": 442.8,
+      "close_price": 448.2,
+      "adjusted_close_price": 448.2,
+      "volume": 52000000.0
+    },
+    {
+      "symbol": "QQQ",
+      "price_timestamp": "2026-05-21T00:00:00Z",
+      "open_price": 448.2,
+      "high_price": 452.0,
+      "low_price": 446.1,
+      "close_price": 451.4,
+      "adjusted_close_price": 451.4,
+      "volume": 49800000.0
+    },
+    {
+      "symbol": "QQQ",
+      "price_timestamp": "2026-05-22T00:00:00Z",
+      "open_price": 451.4,
+      "high_price": 454.3,
+      "low_price": 449.9,
+      "close_price": 453.1,
+      "adjusted_close_price": 453.1,
+      "volume": 50500000.0
+    }
+  ]
+}
