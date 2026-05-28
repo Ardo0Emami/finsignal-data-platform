@@ -1,28 +1,25 @@
-import os
-
+from app.core.config import Settings
 from ingestion.providers.static_sample import StaticSampleProvider
 from ingestion.writers.local_writer import LocalRawWriter
 from ingestion.writers.s3_writer import S3RawWriter
 
 ASSET_UNIVERSE = ["BTCUSD", "QQQ"]
-SAMPLE_DATA_PATH = "data_samples/market_prices_sample.json"
-LOCAL_RAW_BASE_PATH = "data"
 
 
-def build_writer():
-    writer_type = os.getenv("FINSIGNAL_RAW_WRITER", "local").lower().strip()
+def build_writer(settings: Settings | None = None):
+    settings = settings or Settings()
+    writer_type = settings.raw_writer.lower().strip()
 
     if writer_type == "local":
-        return LocalRawWriter(LOCAL_RAW_BASE_PATH)
+        return LocalRawWriter(settings.local_raw_base_path)
 
     if writer_type == "s3":
-        bucket_name = os.getenv("FINSIGNAL_RAW_BUCKET")
-        if not bucket_name:
+        if not settings.raw_bucket:
             raise ValueError(
                 "FINSIGNAL_RAW_BUCKET must be set when FINSIGNAL_RAW_WRITER=s3"
             )
 
-        return S3RawWriter(bucket_name=bucket_name)
+        return S3RawWriter(bucket_name=settings.raw_bucket)
 
     raise ValueError(
         f"Unsupported FINSIGNAL_RAW_WRITER={writer_type}. Expected 'local' or 's3'."
@@ -30,8 +27,9 @@ def build_writer():
 
 
 def main() -> None:
-    provider = StaticSampleProvider(SAMPLE_DATA_PATH)
-    writer = build_writer()
+    settings = Settings()
+    provider = StaticSampleProvider(settings.sample_data_path)
+    writer = build_writer(settings)
 
     for symbol in ASSET_UNIVERSE:
         records = provider.fetch_daily_prices(symbol)
