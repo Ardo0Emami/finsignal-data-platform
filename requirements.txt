@@ -4,3 +4,4 @@ pydantic
 pydantic-settings
 pytest
 ruff
+boto3
