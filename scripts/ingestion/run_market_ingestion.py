@@ -1,10 +1,24 @@
 from app.core.config import Settings
+from ingestion.providers.base import MarketDataProvider
 from ingestion.providers.static_sample import StaticSampleProvider
 from ingestion.writers.base import RawMarketDataWriter
 from ingestion.writers.local_writer import LocalRawWriter
 from ingestion.writers.s3_writer import S3RawWriter
 
 ASSET_UNIVERSE = ["BTCUSD", "QQQ"]
+
+
+def build_provider(settings: Settings | None = None) -> MarketDataProvider:
+    settings = settings or Settings()
+    provider_type = settings.market_data_provider.lower().strip()
+
+    if provider_type == "static_sample":
+        return StaticSampleProvider(settings.sample_data_path)
+
+    raise ValueError(
+        "Unsupported FINSIGNAL_MARKET_DATA_PROVIDER="
+        f"{provider_type}. Expected 'static_sample'."
+    )
 
 
 def build_writer(settings: Settings | None = None) -> RawMarketDataWriter:
@@ -29,7 +43,7 @@ def build_writer(settings: Settings | None = None) -> RawMarketDataWriter:
 
 def main() -> None:
     settings = Settings()
-    provider = StaticSampleProvider(settings.sample_data_path)
+    provider = build_provider(settings)
     writer = build_writer(settings)
 
     for symbol in ASSET_UNIVERSE:
