@@ -19,9 +19,10 @@ class S3RawWriter(RawMarketDataWriter):
         dataset_name: str,
         symbol: str,
         records: list[dict],
+        run_id: str | None = None,
     ) -> str:
         now = datetime.now(timezone.utc)
-        run_id = str(uuid4())
+        run_id = run_id or str(uuid4())
         ingestion_date = now.date().isoformat()
 
         payload = {

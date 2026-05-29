@@ -1,4 +1,8 @@
+from datetime import datetime, timezone
+from uuid import uuid4
+
 from app.core.config import Settings
+from ingestion.audit.models import IngestionAuditEvent
 from ingestion.providers.base import MarketDataProvider
 from ingestion.providers.static_sample import StaticSampleProvider
 from ingestion.writers.base import RawMarketDataWriter
@@ -52,6 +56,30 @@ def build_writer(settings: Settings | None = None) -> RawMarketDataWriter:
     )
 
 
+def build_success_audit_event(
+    run_id: str,
+    provider_name: str,
+    dataset_name: str,
+    symbol: str,
+    started_at: datetime,
+    records_extracted: int,
+    records_written: int,
+    raw_path: str,
+) -> IngestionAuditEvent:
+    return IngestionAuditEvent(
+        run_id=run_id,
+        provider_name=provider_name,
+        dataset_name=dataset_name,
+        symbol=symbol,
+        status="succeeded",
+        started_at=started_at,
+        completed_at=datetime.now(timezone.utc),
+        records_extracted=records_extracted,
+        records_written=records_written,
+        raw_path=raw_path,
+    )
+
+
 def main() -> None:
     settings = Settings()
     provider = build_provider(settings)
@@ -59,6 +87,9 @@ def main() -> None:
     asset_symbols = parse_asset_symbols(settings)
 
     for symbol in asset_symbols:
+        started_at = datetime.now(timezone.utc)
+        run_id = str(uuid4())
+
         records = provider.fetch_daily_prices(symbol)
 
         raw_path = writer.write_market_prices(
@@ -66,9 +97,22 @@ def main() -> None:
             dataset_name="daily_prices",
             symbol=symbol,
             records=[record.model_dump() for record in records],
+            run_id=run_id,
+        )
+
+        audit_event = build_success_audit_event(
+            run_id=run_id,
+            provider_name=provider.provider_name,
+            dataset_name="daily_prices",
+            symbol=symbol,
+            started_at=started_at,
+            records_extracted=len(records),
+            records_written=len(records),
+            raw_path=raw_path,
         )
 
         print(f"{symbol}: wrote {len(records)} records to {raw_path}")
+        print(audit_event.model_dump_json())
 
 
 if __name__ == "__main__":

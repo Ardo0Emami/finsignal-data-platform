@@ -9,5 +9,6 @@ class RawMarketDataWriter(ABC):
         dataset_name: str,
         symbol: str,
         records: list[dict],
+        run_id: str | None = None,
     ) -> str:
         raise NotImplementedError
