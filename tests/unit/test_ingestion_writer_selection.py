@@ -3,7 +3,7 @@ import pytest
 from app.core.config import Settings
 from ingestion.writers.local_writer import LocalRawWriter
 from ingestion.writers.s3_writer import S3RawWriter
-from scripts.local.run_local_market_ingestion import build_writer
+from scripts.ingestion.run_market_ingestion import build_writer
 
 
 def test_build_writer_defaults_to_local() -> None:
