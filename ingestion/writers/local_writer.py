@@ -4,8 +4,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
 
+from ingestion.writers.base import RawMarketDataWriter
 
-class LocalRawWriter:
+
+class LocalRawWriter(RawMarketDataWriter):
     def __init__(self, base_path: str):
         self.base_path = Path(base_path)
 

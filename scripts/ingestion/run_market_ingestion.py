@@ -1,12 +1,13 @@
 from app.core.config import Settings
 from ingestion.providers.static_sample import StaticSampleProvider
+from ingestion.writers.base import RawMarketDataWriter
 from ingestion.writers.local_writer import LocalRawWriter
 from ingestion.writers.s3_writer import S3RawWriter
 
 ASSET_UNIVERSE = ["BTCUSD", "QQQ"]
 
 
-def build_writer(settings: Settings | None = None):
+def build_writer(settings: Settings | None = None) -> RawMarketDataWriter:
     settings = settings or Settings()
     writer_type = settings.raw_writer.lower().strip()
 

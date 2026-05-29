@@ -5,8 +5,10 @@ from uuid import uuid4
 
 import boto3
 
+from ingestion.writers.base import RawMarketDataWriter
 
-class S3RawWriter:
+
+class S3RawWriter(RawMarketDataWriter):
     def __init__(self, bucket_name: str):
         self.bucket_name = bucket_name
         self.client = boto3.client("s3")
