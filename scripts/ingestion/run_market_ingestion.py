@@ -81,6 +81,26 @@ def build_success_audit_event(
     )
 
 
+def build_failure_audit_event(
+    run_id: str,
+    provider_name: str,
+    dataset_name: str,
+    symbol: str,
+    started_at: datetime,
+    error: Exception,
+) -> IngestionAuditEvent:
+    return IngestionAuditEvent(
+        run_id=run_id,
+        provider_name=provider_name,
+        dataset_name=dataset_name,
+        symbol=symbol,
+        status="failed",
+        started_at=started_at,
+        completed_at=datetime.now(timezone.utc),
+        error_message=str(error),
+    )
+
+
 def main() -> None:
     settings = Settings()
     provider = build_provider(settings)
