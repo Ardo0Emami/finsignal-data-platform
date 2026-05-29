@@ -112,32 +112,51 @@ def main() -> None:
         started_at = datetime.now(timezone.utc)
         run_id = str(uuid4())
 
-        records = provider.fetch_daily_prices(symbol)
+        try:
+            records = provider.fetch_daily_prices(symbol)
 
-        raw_path = writer.write_market_prices(
-            provider_name=provider.provider_name,
-            dataset_name="daily_prices",
-            symbol=symbol,
-            records=[record.model_dump() for record in records],
-            run_id=run_id,
-        )
+            raw_path = writer.write_market_prices(
+                provider_name=provider.provider_name,
+                dataset_name="daily_prices",
+                symbol=symbol,
+                records=[record.model_dump() for record in records],
+                run_id=run_id,
+            )
 
-        audit_event = build_success_audit_event(
-            run_id=run_id,
-            provider_name=provider.provider_name,
-            dataset_name="daily_prices",
-            symbol=symbol,
-            started_at=started_at,
-            records_extracted=len(records),
-            records_written=len(records),
-            raw_path=raw_path,
-        )
+            audit_event = build_success_audit_event(
+                run_id=run_id,
+                provider_name=provider.provider_name,
+                dataset_name="daily_prices",
+                symbol=symbol,
+                started_at=started_at,
+                records_extracted=len(records),
+                records_written=len(records),
+                raw_path=raw_path,
+            )
 
-        audit_path = audit_writer.write_event(audit_event)
+            audit_path = audit_writer.write_event(audit_event)
 
-        print(f"{symbol}: wrote {len(records)} records to {raw_path}")
-        print(f"{symbol}: wrote audit event to {audit_path}")
-        print(audit_event.model_dump_json())
+            print(f"{symbol}: wrote {len(records)} records to {raw_path}")
+            print(f"{symbol}: wrote audit event to {audit_path}")
+            print(audit_event.model_dump_json())
+
+        except Exception as error:
+            audit_event = build_failure_audit_event(
+                run_id=run_id,
+                provider_name=provider.provider_name,
+                dataset_name="daily_prices",
+                symbol=symbol,
+                started_at=started_at,
+                error=error,
+            )
+
+            audit_path = audit_writer.write_event(audit_event)
+
+            print(f"{symbol}: ingestion failed")
+            print(f"{symbol}: wrote failure audit event to {audit_path}")
+            print(audit_event.model_dump_json())
+
+            raise
 
 
 if __name__ == "__main__":
