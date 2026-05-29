@@ -43,7 +43,7 @@ Run validation:
 
 Run the local ingestion flow:
 
-    python -m scripts.local.run_local_market_ingestion
+    python -m scripts.ingestion.run_market_ingestion
 
 Run the API locally:
 
@@ -52,6 +52,27 @@ Run the API locally:
 Health check:
 
     curl http://127.0.0.1:8000/health
+
+## Runtime Configuration
+
+FinSignal uses environment variables for runtime configuration.
+
+The local template is provided in `.env.example`.
+
+Supported raw writer modes:
+
+    FINSIGNAL_RAW_WRITER=local
+
+This writes raw files under the local `data/` directory.
+
+    FINSIGNAL_RAW_WRITER=s3
+    FINSIGNAL_RAW_BUCKET=finsignal-dev-raw
+
+This writes raw files to AWS S3.
+
+The same ingestion entry point is used for both modes:
+
+    python -m scripts.ingestion.run_market_ingestion
 
 ## Raw Landing Contract
 
