@@ -5,7 +5,18 @@ from ingestion.writers.base import RawMarketDataWriter
 from ingestion.writers.local_writer import LocalRawWriter
 from ingestion.writers.s3_writer import S3RawWriter
 
-ASSET_UNIVERSE = ["BTCUSD", "QQQ"]
+
+def parse_asset_symbols(settings: Settings) -> list[str]:
+    symbols = [
+        symbol.strip().upper()
+        for symbol in settings.asset_symbols.split(",")
+        if symbol.strip()
+    ]
+
+    if not symbols:
+        raise ValueError("FINSIGNAL_ASSET_SYMBOLS must include at least one symbol.")
+
+    return symbols
 
 
 def build_provider(settings: Settings | None = None) -> MarketDataProvider:
@@ -45,8 +56,9 @@ def main() -> None:
     settings = Settings()
     provider = build_provider(settings)
     writer = build_writer(settings)
+    asset_symbols = parse_asset_symbols(settings)
 
-    for symbol in ASSET_UNIVERSE:
+    for symbol in asset_symbols:
         records = provider.fetch_daily_prices(symbol)
 
         raw_path = writer.write_market_prices(

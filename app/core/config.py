@@ -4,6 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     raw_writer: str = "local"
     market_data_provider: str = "static_sample"
+    asset_symbols: str = "BTCUSD,QQQ"
     raw_bucket: str | None = None
     sample_data_path: str = "data_samples/market_prices_sample.json"
     local_raw_base_path: str = "data"
