@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from uuid import uuid4
 
 from app.core.config import Settings
+from ingestion.audit.local_writer import LocalAuditWriter
 from ingestion.audit.models import IngestionAuditEvent
 from ingestion.providers.base import MarketDataProvider
 from ingestion.providers.static_sample import StaticSampleProvider
@@ -84,6 +85,7 @@ def main() -> None:
     settings = Settings()
     provider = build_provider(settings)
     writer = build_writer(settings)
+    audit_writer = LocalAuditWriter(settings.local_raw_base_path)
     asset_symbols = parse_asset_symbols(settings)
 
     for symbol in asset_symbols:
@@ -111,7 +113,10 @@ def main() -> None:
             raw_path=raw_path,
         )
 
+        audit_path = audit_writer.write_event(audit_event)
+
         print(f"{symbol}: wrote {len(records)} records to {raw_path}")
+        print(f"{symbol}: wrote audit event to {audit_path}")
         print(audit_event.model_dump_json())
 
 
