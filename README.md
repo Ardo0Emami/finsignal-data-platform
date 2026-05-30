@@ -23,6 +23,7 @@ The current foundation includes:
 - Raw metadata generation with checksum
 - Local ingestion audit event writer
 - Success and failure ingestion audit events
+- Local ingestion audit inspection script
 - Reusable market ingestion entry point
 - Unit tests for provider, writer, config, and audit behavior
 - GitHub Actions workflow for Python validation
@@ -92,6 +93,10 @@ This writes raw files to AWS S3.
 The same ingestion entry point is used for both modes:
 
     python -m scripts.ingestion.run_market_ingestion
+
+Inspect recent local ingestion audit events:
+
+    python -m scripts.audit.inspect_ingestion_audit
 
 ## Raw Landing Contract
 
