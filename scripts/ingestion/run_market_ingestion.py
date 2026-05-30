@@ -1,11 +1,17 @@
-from datetime import datetime, timezone
-from uuid import uuid4
+from __future__ import annotations
+
+from typing import Any
 
 from app.core.config import Settings
 from ingestion.audit.local_writer import LocalAuditWriter
 from ingestion.audit.models import IngestionAuditEvent
 from ingestion.providers.base import MarketDataProvider
 from ingestion.providers.static_sample import StaticSampleProvider
+from ingestion.services.market_ingestion_service import (
+    MarketIngestionService,
+    build_failure_audit_event,
+    build_success_audit_event,
+)
 from ingestion.writers.base import RawMarketDataWriter
 from ingestion.writers.local_writer import LocalRawWriter
 from ingestion.writers.s3_writer import S3RawWriter
@@ -57,106 +63,52 @@ def build_writer(settings: Settings | None = None) -> RawMarketDataWriter:
     )
 
 
-def build_success_audit_event(
-    run_id: str,
-    provider_name: str,
-    dataset_name: str,
-    symbol: str,
-    started_at: datetime,
-    records_extracted: int,
-    records_written: int,
-    raw_path: str,
-) -> IngestionAuditEvent:
-    return IngestionAuditEvent(
-        run_id=run_id,
-        provider_name=provider_name,
-        dataset_name=dataset_name,
-        symbol=symbol,
-        status="succeeded",
-        started_at=started_at,
-        completed_at=datetime.now(timezone.utc),
-        records_extracted=records_extracted,
-        records_written=records_written,
-        raw_path=raw_path,
+def build_ingestion_service(settings: Settings) -> MarketIngestionService:
+    return MarketIngestionService(
+        provider=build_provider(settings),
+        writer=build_writer(settings),
+        audit_writer=LocalAuditWriter(settings.local_raw_base_path),
     )
 
 
-def build_failure_audit_event(
-    run_id: str,
-    provider_name: str,
-    dataset_name: str,
-    symbol: str,
-    started_at: datetime,
-    error: Exception,
-) -> IngestionAuditEvent:
-    return IngestionAuditEvent(
-        run_id=run_id,
-        provider_name=provider_name,
-        dataset_name=dataset_name,
-        symbol=symbol,
-        status="failed",
-        started_at=started_at,
-        completed_at=datetime.now(timezone.utc),
-        error_message=str(error),
-    )
+def _print_result(result: Any) -> None:
+    if result.status == "succeeded":
+        print(
+            f"{result.symbol}: wrote {result.records_written} records "
+            f"to {result.raw_path}"
+        )
+        print(f"{result.symbol}: wrote audit event to {result.audit_path}")
+        print(result.audit_event.model_dump_json())
+        return
+
+    print(f"{result.symbol}: ingestion failed")
+    print(f"{result.symbol}: wrote failure audit event to {result.audit_path}")
+    print(result.audit_event.model_dump_json())
 
 
 def main() -> None:
     settings = Settings()
-    provider = build_provider(settings)
-    writer = build_writer(settings)
-    audit_writer = LocalAuditWriter(settings.local_raw_base_path)
     asset_symbols = parse_asset_symbols(settings)
+    service = build_ingestion_service(settings)
 
     for symbol in asset_symbols:
-        started_at = datetime.now(timezone.utc)
-        run_id = str(uuid4())
+        result = service.run_for_symbol(symbol)
+        _print_result(result)
 
-        try:
-            records = provider.fetch_daily_prices(symbol)
+        if result.status == "failed":
+            raise RuntimeError(result.error_message)
 
-            raw_path = writer.write_market_prices(
-                provider_name=provider.provider_name,
-                dataset_name="daily_prices",
-                symbol=symbol,
-                records=[record.model_dump() for record in records],
-                run_id=run_id,
-            )
 
-            audit_event = build_success_audit_event(
-                run_id=run_id,
-                provider_name=provider.provider_name,
-                dataset_name="daily_prices",
-                symbol=symbol,
-                started_at=started_at,
-                records_extracted=len(records),
-                records_written=len(records),
-                raw_path=raw_path,
-            )
-
-            audit_path = audit_writer.write_event(audit_event)
-
-            print(f"{symbol}: wrote {len(records)} records to {raw_path}")
-            print(f"{symbol}: wrote audit event to {audit_path}")
-            print(audit_event.model_dump_json())
-
-        except Exception as error:
-            audit_event = build_failure_audit_event(
-                run_id=run_id,
-                provider_name=provider.provider_name,
-                dataset_name="daily_prices",
-                symbol=symbol,
-                started_at=started_at,
-                error=error,
-            )
-
-            audit_path = audit_writer.write_event(audit_event)
-
-            print(f"{symbol}: ingestion failed")
-            print(f"{symbol}: wrote failure audit event to {audit_path}")
-            print(audit_event.model_dump_json())
-
-            raise
+__all__ = [
+    "IngestionAuditEvent",
+    "build_failure_audit_event",
+    "build_ingestion_service",
+    "build_provider",
+    "build_success_audit_event",
+    "build_writer",
+    "main",
+    "parse_asset_symbols",
+]
 
 
 if __name__ == "__main__":
