@@ -63,7 +63,9 @@ def build_writer(settings: Settings | None = None) -> RawMarketDataWriter:
     )
 
 
-def build_ingestion_service(settings: Settings) -> MarketIngestionService:
+def build_ingestion_service(settings: Settings | None = None) -> MarketIngestionService:
+    settings = settings or Settings()
+
     return MarketIngestionService(
         provider=build_provider(settings),
         writer=build_writer(settings),
@@ -71,32 +73,53 @@ def build_ingestion_service(settings: Settings) -> MarketIngestionService:
     )
 
 
-def _print_result(result: Any) -> None:
-    if result.status == "succeeded":
+def run_full_pipeline(settings: Settings | None = None) -> list[dict[str, Any]]:
+    """Run the configured market ingestion pipeline.
+
+    This is the clean callable entrypoint for Airflow.
+    Airflow should call this function instead of duplicating ingestion logic.
+    """
+
+    settings = settings or Settings()
+    symbols = parse_asset_symbols(settings)
+    service = build_ingestion_service(settings)
+    results = service.run_for_symbols(symbols)
+
+    return [
+        {
+            "symbol": result.symbol,
+            "status": result.status,
+            "records_extracted": result.records_extracted,
+            "records_written": result.records_written,
+            "raw_path": result.raw_path,
+            "audit_path": result.audit_path,
+            "error_message": result.error_message,
+        }
+        for result in results
+    ]
+
+
+def _print_result(result: dict[str, Any]) -> None:
+    if result["status"] == "succeeded":
         print(
-            f"{result.symbol}: wrote {result.records_written} records "
-            f"to {result.raw_path}"
+            f"{result['symbol']}: wrote {result['records_written']} records "
+            f"to {result['raw_path']}"
         )
-        print(f"{result.symbol}: wrote audit event to {result.audit_path}")
-        print(result.audit_event.model_dump_json())
+        print(f"{result['symbol']}: wrote audit event to {result['audit_path']}")
         return
 
-    print(f"{result.symbol}: ingestion failed")
-    print(f"{result.symbol}: wrote failure audit event to {result.audit_path}")
-    print(result.audit_event.model_dump_json())
+    print(f"{result['symbol']}: ingestion failed")
+    print(f"{result['symbol']}: wrote failure audit event to {result['audit_path']}")
 
 
 def main() -> None:
-    settings = Settings()
-    asset_symbols = parse_asset_symbols(settings)
-    service = build_ingestion_service(settings)
+    results = run_full_pipeline()
 
-    for symbol in asset_symbols:
-        result = service.run_for_symbol(symbol)
+    for result in results:
         _print_result(result)
 
-        if result.status == "failed":
-            raise RuntimeError(result.error_message)
+        if result["status"] == "failed":
+            raise RuntimeError(result["error_message"])
 
 
 __all__ = [
@@ -108,6 +131,7 @@ __all__ = [
     "build_writer",
     "main",
     "parse_asset_symbols",
+    "run_full_pipeline",
 ]
 
 

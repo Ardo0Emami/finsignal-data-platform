@@ -22,30 +22,10 @@ DEFAULT_ARGS = {
 def market_daily_ingestion_dag() -> None:
     @task
     def run_daily_market_ingestion() -> list[dict[str, object]]:
-        from app.core.config import Settings
-        from scripts.ingestion.run_market_ingestion import (
-            build_ingestion_service,
-            parse_asset_symbols,
-        )
+        # Keep DAG logic thin. Reusable ingestion workflow lives outside Airflow.
+        from scripts.ingestion.run_market_ingestion import run_full_pipeline
 
-        settings = Settings()
-        service = build_ingestion_service(settings)
-        symbols = parse_asset_symbols(settings)
-
-        results = service.run_for_symbols(symbols)
-
-        return [
-            {
-                "symbol": result.symbol,
-                "status": result.status,
-                "records_extracted": result.records_extracted,
-                "records_written": result.records_written,
-                "raw_path": result.raw_path,
-                "audit_path": result.audit_path,
-                "error_message": result.error_message,
-            }
-            for result in results
-        ]
+        return run_full_pipeline()
 
     run_daily_market_ingestion()
 
