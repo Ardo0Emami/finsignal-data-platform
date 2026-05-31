@@ -25,6 +25,9 @@ The current foundation includes:
 - Success and failure ingestion audit events
 - Local ingestion audit inspection script
 - Reusable market ingestion entry point
+- Airflow DAG contract test for reusable entrypoint
+- Airflow-ready daily market ingestion DAG
+- Reusable market ingestion service layer
 - Unit tests for provider, writer, config, and audit behavior
 - GitHub Actions workflow for Python validation
 - Terraform storage foundation
@@ -156,6 +159,28 @@ Failed ingestion events use:
     status=failed
 
 Failure audit events preserve the error message so ingestion failures remain traceable instead of disappearing as unstructured exceptions.
+
+## Airflow Orchestration
+
+FinSignal uses Airflow for scheduled workflow orchestration.
+
+Airflow DAGs must stay thin. They define schedules, retries, and task wiring, then call reusable project entry points.
+
+The daily market ingestion DAG calls:
+
+    scripts.ingestion.run_market_ingestion.run_full_pipeline
+
+This keeps ingestion business logic outside Airflow and inside the reusable ingestion service layer.
+
+Airflow is intentionally not installed in the base local Python environment. It should run in a dedicated Airflow runtime/container because Airflow has its own dependency constraints.
+
+Current DAG location:
+
+    airflow/dags/market_daily_ingestion_dag.py
+
+The DAG currently orchestrates the same ingestion flow that can be run locally with:
+
+    python -m scripts.ingestion.run_market_ingestion
 
 ## Architecture Direction
 

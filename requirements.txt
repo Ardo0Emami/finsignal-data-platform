@@ -5,8 +5,3 @@ pydantic-settings
 pytest
 ruff
 boto3
-
-# Airflow is intentionally not installed in the base local environment.
-# The Airflow DAGs are designed to run inside an Airflow runtime/container.
-# A dedicated Airflow environment file or docker-compose setup will be added
-# when local orchestration is enabled.
