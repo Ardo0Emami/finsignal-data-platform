@@ -182,6 +182,46 @@ The DAG currently orchestrates the same ingestion flow that can be run locally w
 
     python -m scripts.ingestion.run_market_ingestion
 
+## Local Airflow Runtime
+
+Airflow is used for local scheduled orchestration during development.
+
+Start Airflow:
+
+    cd airflow
+    docker compose up airflow-init
+    docker compose up -d
+
+Open Airflow UI:
+
+    http://localhost:8080
+
+Default local credentials:
+
+    username: airflow
+    password: airflow
+
+List running containers:
+
+    docker compose ps
+
+View scheduler logs:
+
+    docker compose logs -f airflow-scheduler
+
+Stop Airflow:
+
+    docker compose down
+
+Stop Airflow and remove local metadata volume:
+
+    docker compose down -v
+
+The local Airflow runtime mounts the project source code into the Airflow containers and uses the same ingestion entry point as local execution:
+
+    scripts.ingestion.run_market_ingestion.run_full_pipeline
+
+
 ## Architecture Direction
 
 FinSignal is being built as a product-style data platform with clear responsibilities across:
