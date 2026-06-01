@@ -55,7 +55,7 @@ services:
 
   airflow-apiserver:
     <<: *airflow-common
-    command: api-server --workers 1
+    command: api-server
     ports:
       - "8080:8080"
     restart: unless-stopped
