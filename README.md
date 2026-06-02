@@ -33,6 +33,10 @@ The current foundation includes:
 - Terraform storage foundation
 - Terraform IAM ingestion role foundation
 - Terraform formatting workflow
+- Snowflake raw market price load script
+- Snowflake schema apply script
+- Snowflake raw market price row mapper
+- Snowflake RAW and AUDIT schema scripts
 
 ## Local Development
 
@@ -220,6 +224,48 @@ Stop Airflow and remove local metadata volume:
 The local Airflow runtime mounts the project source code into the Airflow containers and uses the same ingestion entry point as local execution:
 
     scripts.ingestion.run_market_ingestion.run_full_pipeline
+
+
+## Snowflake Raw Load
+
+Phase 3 introduces the Snowflake raw-load foundation.
+
+Create Snowflake database and schemas:
+
+    python -m scripts.snowflake.apply_schema
+
+Inspect latest local raw market price files as warehouse-ready rows:
+
+    python -m scripts.snowflake.inspect_raw_market_price_rows --limit 5
+
+Load latest local raw market price files into Snowflake:
+
+    python -m scripts.snowflake.load_raw_market_prices --limit 5
+
+Snowflake connection settings are configured through environment variables:
+
+    FINSIGNAL_SNOWFLAKE_ACCOUNT=
+    FINSIGNAL_SNOWFLAKE_USER=
+    FINSIGNAL_SNOWFLAKE_PASSWORD=
+    FINSIGNAL_SNOWFLAKE_ROLE=
+    FINSIGNAL_SNOWFLAKE_WAREHOUSE=
+    FINSIGNAL_SNOWFLAKE_DATABASE=FINSIGNAL_DW
+    FINSIGNAL_SNOWFLAKE_SCHEMA=RAW
+
+The Snowflake raw market price table is:
+
+    FINSIGNAL_DW.RAW.RAW_MARKET_PRICES
+
+The Snowflake ingestion audit table is:
+
+    FINSIGNAL_DW.AUDIT.INGESTION_RUNS
+
+The raw-loader path is intentionally separated into two steps:
+
+1. Convert local raw files into warehouse-ready rows.
+2. Load those rows into Snowflake.
+
+This keeps parsing, validation, and warehouse writes independently testable.
 
 
 ## Architecture Direction
