@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     snowflake_account: str | None = None
     snowflake_user: str | None = None
     snowflake_password: str | None = None
+    snowflake_authenticator: str = "snowflake"
     snowflake_role: str | None = None
     snowflake_warehouse: str | None = None
     snowflake_database: str = "FINSIGNAL_DW"

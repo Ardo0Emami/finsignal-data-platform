@@ -1,28 +1,29 @@
 from __future__ import annotations
 
 import json
-from typing import Any
+from pathlib import Path
 
 import pytest
 
 from app.core.config import Settings
 from ingestion.loaders.raw_market_price_loader import RawMarketPriceRow
 from ingestion.loaders.snowflake_market_price_loader import (
-    RAW_MARKET_PRICE_INSERT_SQL,
+    RAW_MARKET_PRICE_STAGE,
     SnowflakeMarketPriceLoader,
+    _build_copy_sql,
+    _build_put_sql,
     create_snowflake_connection,
+    write_raw_market_price_load_file,
 )
 
 
 class FakeCursor:
     def __init__(self) -> None:
-        self.executed_command: str | None = None
-        self.executed_params: list[tuple[Any, ...]] = []
+        self.executed_commands: list[str] = []
         self.closed = False
 
-    def executemany(self, command: str, seqparams: list[tuple[Any, ...]]) -> None:
-        self.executed_command = command
-        self.executed_params = seqparams
+    def execute(self, command: str) -> None:
+        self.executed_commands.append(command)
 
     def close(self) -> None:
         self.closed = True
@@ -43,11 +44,11 @@ class FakeConnection:
         pass
 
 
-def _row() -> RawMarketPriceRow:
+def _row(symbol: str = "BTCUSD") -> RawMarketPriceRow:
     return RawMarketPriceRow(
         provider_name="static_sample",
         dataset_name="daily_prices",
-        symbol="BTCUSD",
+        symbol=symbol,
         price_timestamp="2026-06-01T00:00:00Z",
         open_price=100.0,
         high_price=110.0,
@@ -58,11 +59,62 @@ def _row() -> RawMarketPriceRow:
         raw_path="data/raw/sample/data.json",
         ingestion_run_id="run-123",
         ingested_at="2026-06-01T01:00:00Z",
-        raw_record={"symbol": "BTCUSD", "close_price": 105.0},
+        raw_record={"symbol": symbol, "close_price": 105.0},
     )
 
 
-def test_snowflake_loader_inserts_raw_market_price_rows() -> None:
+def test_write_raw_market_price_load_file_writes_ndjson_rows(tmp_path: Path) -> None:
+    output_path = tmp_path / "raw_market_prices.json"
+
+    write_raw_market_price_load_file(
+        rows=[_row("BTCUSD"), _row("QQQ")],
+        output_path=output_path,
+    )
+
+    lines = output_path.read_text(encoding="utf-8").splitlines()
+
+    assert len(lines) == 2
+
+    first_row = json.loads(lines[0])
+    second_row = json.loads(lines[1])
+
+    assert first_row["symbol"] == "BTCUSD"
+    assert first_row["close_price"] == 105.0
+    assert first_row["raw_record"] == {
+        "symbol": "BTCUSD",
+        "close_price": 105.0,
+    }
+    assert second_row["symbol"] == "QQQ"
+
+
+def test_build_put_sql_quotes_local_file_uri_and_uses_unique_stage_path(
+    tmp_path: Path,
+) -> None:
+    load_file = tmp_path / "raw_market_prices.json"
+    stage_path = f"{RAW_MARKET_PRICE_STAGE}/load_batch_id=abc"
+
+    sql = _build_put_sql(load_file=load_file, stage_path=stage_path)
+
+    assert sql.startswith("PUT 'file://")
+    assert load_file.as_posix() in sql
+    assert f"@{stage_path}" in sql
+    assert "AUTO_COMPRESS=FALSE" in sql
+    assert "OVERWRITE=TRUE" in sql
+
+
+def test_build_copy_sql_copies_only_scoped_stage_prefix() -> None:
+    stage_path = f"{RAW_MARKET_PRICE_STAGE}/load_batch_id=abc"
+
+    sql = _build_copy_sql(stage_path=stage_path)
+
+    assert f"FROM @{stage_path}" in sql
+    assert "COPY INTO FINSIGNAL_DW.RAW.RAW_MARKET_PRICES" in sql
+    assert "FILE_FORMAT = (FORMAT_NAME = FINSIGNAL_DW.RAW.NDJSON_FORMAT)" in sql
+    assert "ON_ERROR = ABORT_STATEMENT" in sql
+    assert "PURGE = FALSE" in sql
+
+
+def test_snowflake_loader_uses_stage_prefix_and_copy_into() -> None:
     connection = FakeConnection()
     loader = SnowflakeMarketPriceLoader(connection)
 
@@ -71,20 +123,15 @@ def test_snowflake_loader_inserts_raw_market_price_rows() -> None:
     assert loaded_count == 1
     assert connection.committed is True
     assert connection.cursor_instance.closed is True
-    assert connection.cursor_instance.executed_command == RAW_MARKET_PRICE_INSERT_SQL
-    assert len(connection.cursor_instance.executed_params) == 1
+    assert len(connection.cursor_instance.executed_commands) == 2
 
-    inserted_row = connection.cursor_instance.executed_params[0]
+    put_command = connection.cursor_instance.executed_commands[0]
+    copy_command = connection.cursor_instance.executed_commands[1]
 
-    assert inserted_row[0] == "static_sample"
-    assert inserted_row[1] == "daily_prices"
-    assert inserted_row[2] == "BTCUSD"
-    assert inserted_row[7] == 105.0
-    assert inserted_row[11] == "run-123"
-    assert json.loads(inserted_row[13]) == {
-        "symbol": "BTCUSD",
-        "close_price": 105.0,
-    }
+    assert put_command.startswith("PUT 'file://")
+    assert f"@{RAW_MARKET_PRICE_STAGE}/load_batch_id=" in put_command
+    assert f"FROM @{RAW_MARKET_PRICE_STAGE}/load_batch_id=" in copy_command
+    assert "PURGE = FALSE" in copy_command
 
 
 def test_snowflake_loader_skips_empty_row_list() -> None:
@@ -95,7 +142,7 @@ def test_snowflake_loader_skips_empty_row_list() -> None:
 
     assert loaded_count == 0
     assert connection.committed is False
-    assert connection.cursor_instance.executed_command is None
+    assert connection.cursor_instance.executed_commands == []
 
 
 def test_create_snowflake_connection_requires_connection_settings() -> None:
