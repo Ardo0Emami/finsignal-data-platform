@@ -9,6 +9,14 @@ class Settings(BaseSettings):
     sample_data_path: str = "data_samples/market_prices_sample.json"
     local_raw_base_path: str = "data"
 
+    snowflake_account: str | None = None
+    snowflake_user: str | None = None
+    snowflake_password: str | None = None
+    snowflake_role: str | None = None
+    snowflake_warehouse: str | None = None
+    snowflake_database: str = "FINSIGNAL_DW"
+    snowflake_schema: str = "RAW"
+
     model_config = SettingsConfigDict(
         env_prefix="FINSIGNAL_",
         env_file=".env",

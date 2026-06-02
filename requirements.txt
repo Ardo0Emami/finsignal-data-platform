@@ -5,3 +5,4 @@ pydantic-settings
 pytest
 ruff
 boto3
+snowflake-connector-python
