@@ -253,6 +253,19 @@ Manual suspend command:
 Do not use always-on warehouses for this project.
 
 
+## Snowflake Connection Test
+
+Before applying schemas or loading data, validate that Snowflake credentials are configured:
+
+    python -m scripts.snowflake.check_snowflake_ready
+
+Then test the actual Snowflake connection:
+
+    python -m scripts.snowflake.test_connection
+
+The connection test prints the active account, user, role, warehouse, database, and schema.
+
+
 ## Snowflake Raw Load
 
 Phase 3 introduces the Snowflake raw-load foundation.
