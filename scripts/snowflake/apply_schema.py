@@ -7,6 +7,7 @@ from app.core.config import Settings
 from ingestion.loaders.snowflake_market_price_loader import create_snowflake_connection
 
 DEFAULT_SCHEMA_SCRIPT_PATHS = [
+    Path("scripts/snowflake/000_create_warehouse.sql"),
     Path("scripts/snowflake/001_create_database.sql"),
     Path("scripts/snowflake/002_create_raw_tables.sql"),
     Path("scripts/snowflake/003_create_audit_tables.sql"),

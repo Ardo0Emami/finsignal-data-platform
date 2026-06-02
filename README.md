@@ -226,6 +226,33 @@ The local Airflow runtime mounts the project source code into the Airflow contai
     scripts.ingestion.run_market_ingestion.run_full_pipeline
 
 
+## Snowflake Cost Guardrails
+
+FinSignal uses a dedicated development warehouse for Snowflake testing:
+
+    FINSIGNAL_DEV_WH
+
+The warehouse is configured as:
+
+    WAREHOUSE_SIZE = XSMALL
+    AUTO_SUSPEND = 60
+    AUTO_RESUME = TRUE
+    INITIALLY_SUSPENDED = TRUE
+
+For local testing:
+
+1. Use the smallest warehouse.
+2. Run only small loads first.
+3. Verify results with targeted queries.
+4. Suspend the warehouse after testing.
+
+Manual suspend command:
+
+    ALTER WAREHOUSE FINSIGNAL_DEV_WH SUSPEND;
+
+Do not use always-on warehouses for this project.
+
+
 ## Snowflake Raw Load
 
 Phase 3 introduces the Snowflake raw-load foundation.
