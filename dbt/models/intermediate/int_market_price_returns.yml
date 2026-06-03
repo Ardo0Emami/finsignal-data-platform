@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: int_market_price_returns
+    description: Daily market price observations enriched with previous close and daily return.
+    columns:
+      - name: provider_name
+        tests:
+          - not_null
+      - name: dataset_name
+        tests:
+          - not_null
+      - name: symbol
+        tests:
+          - not_null
+      - name: price_timestamp
+        tests:
+          - not_null
+      - name: price_date
+        tests:
+          - not_null
+      - name: close_price
+        tests:
+          - not_null
+      - name: previous_close_price
+        description: Previous close price for the same provider, dataset, and symbol.
+      - name: daily_return
+        description: Simple daily return calculated as close over previous close.
+      - name: ingestion_run_id
+        tests:
+          - not_null
+      - name: raw_path
+        tests:
+          - not_null
