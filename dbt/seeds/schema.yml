@@ -1,0 +1,22 @@
+version: 2
+
+seeds:
+  - name: signal_definitions
+    description: Versioned signal definition registry used by signal marts.
+    columns:
+      - name: signal_code
+        tests:
+          - not_null
+          - unique
+      - name: signal_version
+        tests:
+          - not_null
+      - name: signal_name
+        tests:
+          - not_null
+      - name: signal_description
+        tests:
+          - not_null
+      - name: is_active
+        tests:
+          - not_null

@@ -7,6 +7,9 @@ profile: finsignal
 model-paths:
   - models
 
+seed-paths:
+  - seeds
+
 macro-paths:
   - macros
 
@@ -25,3 +28,8 @@ models:
     marts:
       +schema: MARTS
       +materialized: table
+
+
+seeds:
+  finsignal:
+    +schema: MARTS

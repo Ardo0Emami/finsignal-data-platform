@@ -1,0 +1,40 @@
+version: 2
+
+models:
+  - name: mart_asset_signal
+    description: Current explainable asset signal derived from versioned signal definitions and market regime features.
+    columns:
+      - name: symbol
+        tests:
+          - not_null
+          - unique
+      - name: price_date
+        tests:
+          - not_null
+      - name: signal_code
+        tests:
+          - not_null
+      - name: signal_version
+        tests:
+          - not_null
+      - name: signal_label
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - buy_watch
+                  - risk_off
+                  - hold_neutral
+      - name: signal_explanation
+        tests:
+          - not_null
+      - name: regime_label
+        tests:
+          - not_null
+      - name: ingestion_run_id
+        tests:
+          - not_null
+      - name: raw_path
+        tests:
+          - not_null

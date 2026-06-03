@@ -1,0 +1,2 @@
+signal_code,signal_version,signal_name,signal_description,is_active
+momentum_regime_v1,1,Momentum Regime Signal,Rule-based signal derived from current regime classification,true
