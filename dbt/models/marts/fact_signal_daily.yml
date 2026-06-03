@@ -1,0 +1,57 @@
+version: 2
+
+models:
+  - name: fact_signal_daily
+    description: Historical daily signal fact table by asset, date, and signal version.
+    columns:
+      - name: symbol
+        description: Asset symbol.
+        tests:
+          - not_null
+      - name: price_date
+        description: Signal observation date.
+        tests:
+          - not_null
+      - name: price_timestamp
+        description: Source price timestamp used to calculate signal.
+        tests:
+          - not_null
+      - name: signal_code
+        description: Signal definition code.
+        tests:
+          - not_null
+      - name: signal_version
+        description: Signal definition version.
+        tests:
+          - not_null
+      - name: signal_label
+        description: Assigned signal label.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - buy_watch
+                  - risk_off
+                  - hold_neutral
+      - name: signal_explanation
+        description: Human-readable signal explanation.
+        tests:
+          - not_null
+      - name: regime_label
+        description: Regime label used to derive the signal.
+        tests:
+          - not_null
+      - name: regime_explanation
+        description: Explanation for regime classification.
+        tests:
+          - not_null
+      - name: close_price
+        tests:
+          - not_null
+      - name: ingestion_run_id
+        tests:
+          - not_null
+      - name: raw_path
+        tests:
+          - not_null
