@@ -1,0 +1,33 @@
+version: 2
+
+models:
+  - name: mart_current_asset_snapshot
+    description: Latest analytics-ready market snapshot per asset.
+    columns:
+      - name: symbol
+        tests:
+          - not_null
+          - unique
+      - name: price_date
+        tests:
+          - not_null
+      - name: price_timestamp
+        tests:
+          - not_null
+      - name: close_price
+        tests:
+          - not_null
+      - name: daily_return
+        description: Latest simple daily return.
+      - name: close_price_3d_moving_avg
+        description: Latest 3-day moving average.
+      - name: daily_return_3d_volatility
+        description: Latest 3-day return volatility.
+      - name: close_vs_3d_moving_avg
+        description: Latest relative price distance from moving average.
+      - name: ingestion_run_id
+        tests:
+          - not_null
+      - name: raw_path
+        tests:
+          - not_null
