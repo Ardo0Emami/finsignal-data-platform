@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: fact_backtest_result
+    description: Historical backtest result table measuring forward returns after each daily signal.
+    columns:
+      - name: symbol
+        description: Asset symbol.
+        tests:
+          - not_null
+      - name: signal_date
+        description: Date the signal was observed.
+        tests:
+          - not_null
+      - name: signal_code
+        description: Signal definition code.
+        tests:
+          - not_null
+      - name: signal_version
+        description: Signal definition version.
+        tests:
+          - not_null
+      - name: signal_label
+        description: Signal label assigned on signal_date.
+        tests:
+          - not_null
+      - name: signal_close_price
+        description: Close price at signal date.
+        tests:
+          - not_null
+      - name: forward_return_1d
+        description: Forward return one calendar day after the signal date.
+      - name: forward_return_3d
+        description: Forward return three calendar days after the signal date.
+      - name: forward_return_7d
+        description: Forward return seven calendar days after the signal date.
+      - name: ingestion_run_id
+        description: Source ingestion run identifier.
+        tests:
+          - not_null
+      - name: raw_path
+        description: Source raw file path.
+        tests:
+          - not_null
