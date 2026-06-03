@@ -6,3 +6,5 @@ pytest
 ruff
 boto3
 snowflake-connector-python
+dbt-core
+dbt-snowflake

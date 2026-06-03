@@ -1,0 +1,38 @@
+version: 2
+
+models:
+  - name: stg_market_prices
+    description: Cleaned and deduplicated daily market price observations.
+    columns:
+      - name: provider_name
+        description: Source provider name.
+        tests:
+          - not_null
+      - name: dataset_name
+        description: Dataset identifier.
+        tests:
+          - not_null
+      - name: symbol
+        description: Asset symbol.
+        tests:
+          - not_null
+      - name: price_timestamp
+        description: Source observation timestamp.
+        tests:
+          - not_null
+      - name: price_date
+        description: Date derived from price_timestamp.
+        tests:
+          - not_null
+      - name: close_price
+        description: Closing price used by downstream feature models.
+        tests:
+          - not_null
+      - name: ingestion_run_id
+        description: Ingestion run identifier preserved for lineage.
+        tests:
+          - not_null
+      - name: raw_path
+        description: Raw file path preserved for lineage.
+        tests:
+          - not_null

@@ -1,0 +1,44 @@
+version: 2
+
+sources:
+  - name: raw
+    database: FINSIGNAL_DW
+    schema: RAW
+    description: Raw Snowflake tables loaded from FinSignal ingestion outputs.
+    tables:
+      - name: raw_market_prices
+        identifier: RAW_MARKET_PRICES
+        description: Source-shaped daily market price records loaded from raw files.
+        columns:
+          - name: provider_name
+            description: Source provider name.
+            tests:
+              - not_null
+          - name: dataset_name
+            description: Dataset identifier.
+            tests:
+              - not_null
+          - name: symbol
+            description: Asset symbol.
+            tests:
+              - not_null
+          - name: price_timestamp
+            description: Source observation timestamp.
+            tests:
+              - not_null
+          - name: close_price
+            description: Closing price.
+            tests:
+              - not_null
+          - name: ingestion_run_id
+            description: Ingestion run identifier.
+            tests:
+              - not_null
+          - name: raw_path
+            description: Raw file path used for lineage.
+            tests:
+              - not_null
+          - name: raw_record
+            description: Original source-shaped record.
+            tests:
+              - not_null

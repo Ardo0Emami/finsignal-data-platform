@@ -1,0 +1,15 @@
+finsignal:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account: "{{ env_var('FINSIGNAL_SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('FINSIGNAL_SNOWFLAKE_USER') }}"
+      password: "{{ env_var('FINSIGNAL_SNOWFLAKE_PASSWORD') }}"
+      role: "{{ env_var('FINSIGNAL_SNOWFLAKE_ROLE', 'ACCOUNTADMIN') }}"
+      warehouse: "{{ env_var('FINSIGNAL_SNOWFLAKE_WAREHOUSE', 'FINSIGNAL_DEV_WH') }}"
+      database: "{{ env_var('FINSIGNAL_SNOWFLAKE_DATABASE', 'FINSIGNAL_DW') }}"
+      schema: "{{ env_var('FINSIGNAL_SNOWFLAKE_SCHEMA', 'RAW') }}"
+      authenticator: "{{ env_var('FINSIGNAL_SNOWFLAKE_AUTHENTICATOR', 'snowflake') }}"
+      threads: 4
+      client_session_keep_alive: false

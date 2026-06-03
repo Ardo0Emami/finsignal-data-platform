@@ -1,0 +1,24 @@
+name: finsignal
+version: "1.0.0"
+config-version: 2
+
+profile: finsignal
+
+model-paths:
+  - models
+
+macro-paths:
+  - macros
+
+clean-targets:
+  - target
+  - dbt_packages
+
+models:
+  finsignal:
+    staging:
+      +schema: STAGING
+      +materialized: view
+    marts:
+      +schema: MARTS
+      +materialized: table
