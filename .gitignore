@@ -47,3 +47,4 @@ airflow/logs/
 
 # Local dbt profile; uses environment-specific credentials
 dbt/profiles.yml
+dbt/.user.yml
