@@ -1,0 +1,42 @@
+version: 2
+
+models:
+  - name: mart_asset_daily_returns
+    description: Analytics-facing daily asset return table for downstream signal and regime models.
+    columns:
+      - name: symbol
+        description: Asset symbol.
+        tests:
+          - not_null
+      - name: price_date
+        description: Observation date.
+        tests:
+          - not_null
+      - name: price_timestamp
+        description: Source observation timestamp.
+        tests:
+          - not_null
+      - name: close_price
+        description: Current close price.
+        tests:
+          - not_null
+      - name: previous_close_price
+        description: Previous close price for the same asset.
+      - name: daily_return
+        description: Simple daily return.
+      - name: provider_name
+        description: Source provider name.
+        tests:
+          - not_null
+      - name: dataset_name
+        description: Dataset identifier.
+        tests:
+          - not_null
+      - name: ingestion_run_id
+        description: Source ingestion run identifier.
+        tests:
+          - not_null
+      - name: raw_path
+        description: Raw file lineage path.
+        tests:
+          - not_null
