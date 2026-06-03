@@ -1,0 +1,53 @@
+version: 2
+
+models:
+  - name: mart_asset_regime
+    description: Current explainable market regime classification per asset.
+    columns:
+      - name: symbol
+        description: Asset symbol.
+        tests:
+          - not_null
+          - unique
+      - name: price_date
+        description: Latest observation date used for regime classification.
+        tests:
+          - not_null
+      - name: price_timestamp
+        description: Latest observation timestamp used for regime classification.
+        tests:
+          - not_null
+      - name: regime_label
+        description: Rule-based regime label.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - bullish_momentum
+                  - bearish_momentum
+                  - neutral
+      - name: regime_explanation
+        description: Human-readable explanation for why the regime was assigned.
+        tests:
+          - not_null
+      - name: close_price
+        description: Latest close price.
+        tests:
+          - not_null
+      - name: daily_return
+        description: Latest simple daily return.
+      - name: close_price_3d_moving_avg
+        description: Latest 3-day moving average.
+      - name: daily_return_3d_volatility
+        description: Latest 3-day return volatility.
+      - name: close_vs_3d_moving_avg
+        description: Relative price distance from 3-day moving average.
+      - name: ingestion_run_id
+        description: Source ingestion run identifier.
+        tests:
+          - not_null
+      - name: raw_path
+        description: Raw file lineage path.
+        tests:
+          - not_null
