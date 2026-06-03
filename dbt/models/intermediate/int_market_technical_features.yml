@@ -1,0 +1,38 @@
+version: 2
+
+models:
+  - name: int_market_technical_features
+    description: Market price observations enriched with rolling technical features.
+    columns:
+      - name: provider_name
+        tests:
+          - not_null
+      - name: dataset_name
+        tests:
+          - not_null
+      - name: symbol
+        tests:
+          - not_null
+      - name: price_timestamp
+        tests:
+          - not_null
+      - name: price_date
+        tests:
+          - not_null
+      - name: close_price
+        tests:
+          - not_null
+      - name: daily_return
+        description: Simple daily return.
+      - name: close_price_3d_moving_avg
+        description: Three-observation moving average of close price.
+      - name: daily_return_3d_volatility
+        description: Three-observation sample standard deviation of daily returns.
+      - name: close_vs_3d_moving_avg
+        description: Relative distance between close price and 3-day moving average.
+      - name: ingestion_run_id
+        tests:
+          - not_null
+      - name: raw_path
+        tests:
+          - not_null
