@@ -44,3 +44,6 @@ dbt/logs/
 
 # Airflow local runtime artifacts
 airflow/logs/
+
+# Local dbt profile; uses environment-specific credentials
+dbt/profiles.yml
