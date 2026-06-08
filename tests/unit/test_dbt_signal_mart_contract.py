@@ -21,27 +21,29 @@ def test_signal_definitions_seed_is_versioned() -> None:
     assert "true" in seed
 
 
-def test_asset_signal_mart_uses_regime_and_signal_definition_seed() -> None:
+def test_asset_signal_mart_uses_classifications_and_signal_definition_seed() -> None:
     model = Path("dbt/models/marts/mart_asset_signal.sql").read_text(
         encoding="utf-8"
     )
 
-    assert "{{ ref('mart_asset_regime') }}" in model
+    assert "{{ ref('int_asset_signal_classifications') }}" in model
     assert "{{ ref('signal_definitions') }}" in model
     assert "signal_code = 'momentum_regime_v1'" in model
     assert "signal_version" in model
     assert "signal_label" in model
     assert "signal_explanation" in model
+    assert "qualify row_number() over" in model
 
 
-def test_asset_signal_mart_defines_expected_signal_labels() -> None:
+def test_asset_signal_mart_does_not_duplicate_signal_label_rules() -> None:
     model = Path("dbt/models/marts/mart_asset_signal.sql").read_text(
         encoding="utf-8"
     )
 
-    assert "buy_watch" in model
-    assert "risk_off" in model
-    assert "hold_neutral" in model
+    assert "when classifications.regime_label" not in model
+    assert "when regimes.regime_label" not in model
+    assert "then 'buy_watch'" not in model
+    assert "then 'risk_off'" not in model
 
     contract = Path("dbt/models/marts/mart_asset_signal.yml").read_text(
         encoding="utf-8"

@@ -3,12 +3,12 @@ from __future__ import annotations
 from pathlib import Path
 
 
-def test_fact_signal_daily_uses_technical_features_and_signal_definitions() -> None:
+def test_fact_signal_daily_uses_classifications_and_signal_definitions() -> None:
     model = Path("dbt/models/marts/fact_signal_daily.sql").read_text(
         encoding="utf-8"
     )
 
-    assert "{{ ref('int_market_technical_features') }}" in model
+    assert "{{ ref('int_asset_signal_classifications') }}" in model
     assert "{{ ref('signal_definitions') }}" in model
     assert "signal_code = 'momentum_regime_v1'" in model
     assert "signal_version" in model
@@ -16,17 +16,16 @@ def test_fact_signal_daily_uses_technical_features_and_signal_definitions() -> N
     assert "signal_explanation" in model
 
 
-def test_fact_signal_daily_preserves_signal_and_regime_explanations() -> None:
+def test_fact_signal_daily_does_not_duplicate_classification_rules() -> None:
     model = Path("dbt/models/marts/fact_signal_daily.sql").read_text(
         encoding="utf-8"
     )
 
-    assert "regime_label" in model
-    assert "regime_explanation" in model
-    assert "signal_label" in model
-    assert "signal_explanation" in model
-    assert "close_vs_3d_moving_avg" in model
-    assert "daily_return" in model
+    assert "bullish_momentum" not in model
+    assert "bearish_momentum" not in model
+    assert "then 'buy_watch'" not in model
+    assert "then 'risk_off'" not in model
+    assert "close_vs_3d_moving_avg > 0 and daily_return > 0" not in model
 
 
 def test_fact_signal_daily_contract_documents_historical_grain() -> None:

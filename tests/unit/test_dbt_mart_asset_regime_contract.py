@@ -3,30 +3,28 @@ from __future__ import annotations
 from pathlib import Path
 
 
-def test_asset_regime_mart_uses_current_asset_snapshot() -> None:
+def test_asset_regime_mart_uses_centralized_signal_classifications() -> None:
     model = Path("dbt/models/marts/mart_asset_regime.sql").read_text(
         encoding="utf-8"
     )
 
-    assert "{{ ref('mart_current_asset_snapshot') }}" in model
+    assert "{{ ref('int_asset_signal_classifications') }}" in model
     assert "regime_label" in model
     assert "regime_explanation" in model
-    assert "bullish_momentum" in model
-    assert "bearish_momentum" in model
-    assert "neutral" in model
+    assert "qualify row_number() over" in model
+    assert "partition by symbol" in model
+    assert "order by price_timestamp desc, ingested_at desc" in model
 
 
-def test_asset_regime_mart_uses_explainable_rule_features() -> None:
+def test_asset_regime_mart_does_not_duplicate_classification_rules() -> None:
     model = Path("dbt/models/marts/mart_asset_regime.sql").read_text(
         encoding="utf-8"
     )
 
-    assert "close_vs_3d_moving_avg > 0" in model
-    assert "daily_return > 0" in model
-    assert "close_vs_3d_moving_avg < 0" in model
-    assert "daily_return < 0" in model
-    assert "Price is above its 3-day moving average" in model
-    assert "Price is below its 3-day moving average" in model
+    assert "bullish_momentum" not in model
+    assert "bearish_momentum" not in model
+    assert "close_vs_3d_moving_avg > 0" not in model
+    assert "daily_return > 0" not in model
 
 
 def test_asset_regime_contract_defines_allowed_regime_labels() -> None:
