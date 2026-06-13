@@ -51,6 +51,6 @@ class RawPriceEventRow(BaseModel):
     symbol: str
     price_timestamp: datetime
     close_price: float
-    raw_s3_path: str
+    raw_path: str
     ingested_at: datetime
     raw_event: dict[str, Any]
