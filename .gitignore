@@ -49,3 +49,4 @@ airflow/logs/
 dbt/profiles.yml
 dbt/.user.yml
 .local/
+build/
