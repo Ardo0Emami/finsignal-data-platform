@@ -15,3 +15,9 @@ variable "environment" {
   type        = string
   default     = "dev"
 }
+
+variable "lambda_package_path" {
+  description = "Path to the zipped latest price ingestion Lambda package."
+  type        = string
+  default     = "../../../build/lambda/latest_price_ingestion.zip"
+}

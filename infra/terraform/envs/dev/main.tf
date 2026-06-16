@@ -27,9 +27,26 @@ module "storage" {
   environment = var.environment
 }
 
+module "kinesis" {
+  source      = "../../modules/kinesis"
+  project     = var.project_name
+  environment = var.environment
+}
+
 module "iam" {
-  source         = "../../modules/iam"
-  project        = var.project_name
-  environment    = var.environment
-  raw_bucket_arn = module.storage.raw_bucket_arn
+  source             = "../../modules/iam"
+  project            = var.project_name
+  environment        = var.environment
+  raw_bucket_arn     = module.storage.raw_bucket_arn
+  kinesis_stream_arn = module.kinesis.stream_arn
+}
+
+module "lambda_ingestion" {
+  source                    = "../../modules/lambda_ingestion"
+  project                   = var.project_name
+  environment               = var.environment
+  raw_bucket_name           = module.storage.raw_bucket_name
+  kinesis_stream_name       = module.kinesis.stream_name
+  lambda_execution_role_arn = module.iam.ingestion_role_arn
+  lambda_package_path       = var.lambda_package_path
 }
