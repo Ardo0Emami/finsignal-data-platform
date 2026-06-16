@@ -8,35 +8,36 @@ FinSignal does not provide investment advice, trading recommendations, or guaran
 
 ## Current Implementation Status
 
-The current foundation includes:
+FinSignal currently includes a working local-first data engineering foundation with batch ingestion, Snowflake raw loading, dbt analytics modeling, testing, and infrastructure-as-code foundations.
 
-- Python project structure
-- FastAPI application foundation with health endpoint
-- Static market data provider
-- Configurable market data provider selection
-- Configurable asset universe
-- Normalized market price record model
-- Local raw landing writer
-- S3 raw landing writer
-- Raw writer contract
-- Partitioned raw data output
-- Raw metadata generation with checksum
-- Local ingestion audit event writer
-- Success and failure ingestion audit events
-- Local ingestion audit inspection script
-- Reusable market ingestion entry point
-- Airflow DAG contract test for reusable entrypoint
-- Airflow-ready daily market ingestion DAG
-- Reusable market ingestion service layer
-- Unit tests for provider, writer, config, and audit behavior
-- GitHub Actions workflow for Python validation
-- Terraform storage foundation
-- Terraform IAM ingestion role foundation
-- Terraform formatting workflow
-- Snowflake raw market price load script
-- Snowflake schema apply script
-- Snowflake raw market price row mapper
-- Snowflake RAW and AUDIT schema scripts
+Implemented components include:
+
+- Python project structure with FastAPI health endpoint
+- configurable market data provider layer
+- static sample provider for BTCUSD and QQQ daily prices
+- normalized market price record model
+- local raw writer with partitioned raw output paths
+- S3 raw writer abstraction for cloud raw landing
+- ingestion service orchestration with success and failure audit events
+- local audit writer for ingestion metadata
+- reusable ingestion entrypoints and inspection scripts
+- Airflow DAG foundation for scheduled market ingestion
+- Snowflake schema scripts for warehouse, database, RAW, and AUDIT objects
+- Snowflake raw load flow using local NDJSON files, internal stages, PUT, and COPY INTO
+- Snowflake verification queries for loaded raw market price data
+- dbt project foundation
+- dbt source definitions for Snowflake RAW tables
+- dbt staging models for normalized and deduplicated market price records
+- dbt intermediate models for analytical transformations, returns, technical features, and signal classification logic
+- dbt marts for analytics-ready market datasets, current asset snapshots, regimes, and signals
+- dbt fact models for historical signal outputs and backtest results
+- dbt tests for key data quality assumptions, accepted values, and unique model grain
+- dbt documentation and lineage generation support
+- streaming/event ingestion foundation with PriceEvent contracts, Kinesis producer abstraction, Kinesis-to-S3 consumer abstraction, and S3 event writer
+- Terraform storage, IAM, Kinesis, and Lambda ingestion module foundations
+- unit tests for ingestion, Snowflake loading, dbt contracts, streaming abstractions, and Terraform module contracts
+- GitHub Actions CI for Python linting and tests
+
 
 ## Local Development
 
@@ -306,6 +307,22 @@ The raw-loader path is intentionally separated into two steps:
 2. Load those rows into Snowflake.
 
 This keeps parsing, validation, and warehouse writes independently testable.
+
+## dbt Analytics Modeling
+
+FinSignal uses dbt to transform Snowflake raw market data into tested, documented, analytics-ready models.
+
+The dbt layer includes:
+
+- source definitions for Snowflake RAW tables
+- staging models for normalized and deduplicated market price records
+- intermediate models for reusable analytical transformations, including returns, technical features, and centralized signal classifications
+- mart models for downstream analytics, current asset snapshots, explainable regimes, signal validation, and backtesting
+- fact models for historical daily signal outputs and forward-return backtest results
+- data tests for key assumptions, accepted values, required fields, and model grain uniqueness
+- documentation and lineage support through dbt model and source definitions
+
+This layer separates raw source-preserved data from cleaned, modeled, and analytics-ready datasets. It also keeps signal logic centralized so current signal views, historical signal facts, and backtest models are derived from the same tested transformation layer.
 
 
 ## Architecture Direction
