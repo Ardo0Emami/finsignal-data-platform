@@ -10,6 +10,7 @@ def test_spark_feature_job_reads_and_writes_parquet() -> None:
 
     assert "spark.read.parquet" in script
     assert '.write.mode("overwrite").parquet' in script
+    assert "toPandas().to_parquet" in script
     assert "data/staged/market_prices" in script
     assert "data/features/asset_features" in script
 
@@ -39,3 +40,13 @@ def test_spark_feature_job_partitions_windows_by_asset_grain() -> None:
     assert '"symbol"' in script
     assert 'orderBy("price_timestamp")' in script
     assert "rowsBetween(-2, 0)" in script
+
+
+def test_spark_feature_job_has_windows_local_output_fallback() -> None:
+    script = Path("spark/jobs/build_asset_feature_parquet.py").read_text(
+        encoding="utf-8"
+    )
+
+    assert "platform.system()" in script
+    assert 'output_path / "asset_features.parquet"' in script
+    assert "features.toPandas().to_parquet" in script

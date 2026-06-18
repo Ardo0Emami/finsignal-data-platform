@@ -1,10 +1,15 @@
 from __future__ import annotations
 
 import argparse
+import platform
 from pathlib import Path
 
 from pyspark.sql import SparkSession, Window
 from pyspark.sql.functions import avg, col, lag, stddev_samp
+
+
+def _is_windows() -> bool:
+    return platform.system().lower() == "windows"
 
 
 def build_asset_feature_parquet(
@@ -55,11 +60,16 @@ def build_asset_feature_parquet(
             )
         )
 
+        if _is_windows():
+            output_path.mkdir(parents=True, exist_ok=True)
+            parquet_file = output_path / "asset_features.parquet"
+            features.toPandas().to_parquet(parquet_file, index=False)
+            return parquet_file
+
         features.write.mode("overwrite").parquet(str(output_path))
+        return output_path
     finally:
         spark.stop()
-
-    return output_path
 
 
 def main() -> None:

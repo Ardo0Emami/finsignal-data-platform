@@ -1,11 +1,46 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 
-from ingestion.loaders.raw_market_price_loader import iter_raw_market_price_rows
+
+def _iter_raw_market_price_payloads(raw_root: Path) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+
+    for data_file in sorted(raw_root.rglob("data.json")):
+        payload = json.loads(data_file.read_text(encoding="utf-8"))
+
+        provider_name = payload["provider"]
+        dataset_name = payload["dataset"]
+        symbol = payload["symbol"]
+        ingestion_run_id = payload["ingestion_run_id"]
+        ingested_at = payload["ingested_at"]
+
+        for record in payload["records"]:
+            rows.append(
+                {
+                    "provider_name": provider_name,
+                    "dataset_name": dataset_name,
+                    "symbol": symbol,
+                    "price_timestamp": record["price_timestamp"],
+                    "price_date": record["price_timestamp"][:10],
+                    "open_price": record.get("open_price"),
+                    "high_price": record.get("high_price"),
+                    "low_price": record.get("low_price"),
+                    "close_price": record["close_price"],
+                    "adjusted_close_price": record.get("adjusted_close_price"),
+                    "volume": record.get("volume"),
+                    "raw_path": str(data_file),
+                    "ingestion_run_id": ingestion_run_id,
+                    "ingested_at": ingested_at,
+                }
+            )
+
+    return rows
 
 
 def export_market_prices_to_parquet(
@@ -14,39 +49,21 @@ def export_market_prices_to_parquet(
     output_path: Path,
     limit: int | None = None,
 ) -> Path:
-    rows = []
+    rows = _iter_raw_market_price_payloads(raw_root)
 
-    for index, row in enumerate(iter_raw_market_price_rows(raw_root)):
-        if limit is not None and index >= limit:
-            break
-
-        rows.append(
-            {
-                "provider_name": row.provider_name,
-                "dataset_name": row.dataset_name,
-                "symbol": row.symbol,
-                "price_timestamp": row.price_timestamp,
-                "price_date": row.price_timestamp.date(),
-                "open_price": row.open_price,
-                "high_price": row.high_price,
-                "low_price": row.low_price,
-                "close_price": row.close_price,
-                "adjusted_close_price": row.adjusted_close_price,
-                "volume": row.volume,
-                "raw_path": row.raw_path,
-                "ingestion_run_id": row.ingestion_run_id,
-                "ingested_at": row.ingested_at,
-            }
-        )
+    if limit is not None:
+        rows = rows[:limit]
 
     if not rows:
         raise ValueError(f"No raw market price rows found under {raw_root}")
 
     dataframe = pd.DataFrame(rows)
-    output_path.mkdir(parents=True, exist_ok=True)
-    dataframe.to_parquet(output_path, index=False)
 
-    return output_path
+    output_path.mkdir(parents=True, exist_ok=True)
+    parquet_file = output_path / "market_prices.parquet"
+    dataframe.to_parquet(parquet_file, index=False)
+
+    return parquet_file
 
 
 def main() -> None:
