@@ -35,6 +35,7 @@ Implemented components include:
 - dbt documentation and lineage generation support
 - streaming/event ingestion foundation with PriceEvent contracts, Kinesis producer abstraction, Kinesis-to-S3 consumer abstraction, and S3 event writer
 - Terraform storage, IAM, Kinesis, and Lambda ingestion module foundations
+- PySpark feature processing foundation for staged Parquet market data
 - unit tests for ingestion, Snowflake loading, dbt contracts, streaming abstractions, and Terraform module contracts
 - GitHub Actions CI for Python linting and tests
 
@@ -324,6 +325,76 @@ The dbt layer includes:
 
 This layer separates raw source-preserved data from cleaned, modeled, and analytics-ready datasets. It also keeps signal logic centralized so current signal views, historical signal facts, and backtest models are derived from the same tested transformation layer.
 
+
+## PySpark Feature Processing
+
+FinSignal uses PySpark for file-based feature processing over staged Parquet datasets.
+
+Spark does not replace Snowflake or dbt in this project. Snowflake remains the analytical warehouse, and dbt remains the warehouse transformation, testing, and documentation layer.
+
+The Spark layer is used when feature processing should operate over files, especially Parquet datasets, and when larger historical windows may become expensive or inconvenient to process only inside the warehouse.
+
+Current Spark jobs include:
+
+- `spark/jobs/export_market_prices_to_parquet.py`
+- `spark/jobs/build_asset_feature_parquet.py`
+
+The local Spark flow is:
+
+    local raw market price JSON
+      -> staged market price Parquet
+      -> PySpark feature job
+      -> asset feature Parquet output
+
+Export local raw market price files to staged Parquet:
+
+    python -m spark.jobs.export_market_prices_to_parquet \
+      --raw-root data/raw \
+      --output data/staged/market_prices
+
+Run the PySpark feature job:
+
+    python -m spark.jobs.build_asset_feature_parquet \
+      --input data/staged/market_prices \
+      --output data/features/asset_features
+
+Inspect generated feature files:
+
+    find data/features/asset_features -maxdepth 2 -type f | sort
+
+Default staged input path:
+
+    data/staged/market_prices
+
+Default feature output path:
+
+    data/features/asset_features
+
+Generated feature columns include:
+
+- previous_close_price
+- daily_return
+- close_price_3d_moving_avg
+- daily_return_3d_volatility
+- close_vs_3d_moving_avg
+
+Feature processing preserves lineage fields such as:
+
+- raw_path
+- ingestion_run_id
+- ingested_at
+
+This allows downstream warehouse or API layers to trace feature rows back to the raw ingestion process.
+
+In local development, Spark runs with:
+
+    local[*]
+
+This means the job runs locally and does not create cloud compute cost.
+
+A managed Spark service such as AWS Glue, EMR, or Databricks should only be introduced when local execution no longer fits the data volume or orchestration requirements.
+
+FinSignal uses PySpark for file-based feature processing over staged Parquet market data. This complements the Snowflake/dbt warehouse modeling layer and demonstrates that large-window or file-oriented feature generation can be separated from warehouse transformation logic when appropriate.
 
 ## Architecture Direction
 
