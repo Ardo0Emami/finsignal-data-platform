@@ -396,6 +396,43 @@ A managed Spark service such as AWS Glue, EMR, or Databricks should only be intr
 
 FinSignal uses PySpark for file-based feature processing over staged Parquet market data. This complements the Snowflake/dbt warehouse modeling layer and demonstrates that large-window or file-oriented feature generation can be separated from warehouse transformation logic when appropriate.
 
+
+## Product API
+
+FinSignal includes a FastAPI product layer over the governed Snowflake marts.
+
+The API exposes read-only asset intelligence endpoints:
+
+    GET /health
+    GET /api/v1/assets/{symbol}/snapshot
+    GET /api/v1/assets/{symbol}/regime
+    GET /api/v1/assets/{symbol}/signals
+    POST /api/v1/ask
+
+The `/api/v1/ask` endpoint is a governed explanation endpoint. It answers questions using modeled evidence from `MARTS`, including signal labels, regime labels, signal explanations, regime explanations, and latest asset snapshots. It is not a free-form ungrounded answer generator.
+
+Local run:
+
+    set -a
+    source .env
+    set +a
+
+    uvicorn app.main:app --reload --port 8000
+
+Example governed explanation request:
+
+    curl -X POST http://127.0.0.1:8000/api/v1/ask \
+      -H "Content-Type: application/json" \
+      -d '{"symbol":"QQQ","question":"Why is QQQ buy_watch?"}'
+
+Detailed API contract:
+
+    docs/contracts/product_api.md
+
+Operational runbook:
+
+    docs/operations/product_api_runbook.md
+
 ## Architecture Direction
 
 FinSignal is being built as a product-style data platform with clear responsibilities across:
