@@ -4,6 +4,13 @@ FinSignal is a market-intelligence data platform that turns raw asset price data
 
 The platform is organized as layered data architecture rather than a single monolithic script.
 
+
+## Architecture diagram
+
+A Mermaid-based platform flow diagram is available at:
+
+    docs/architecture/platform_flow_diagram.md
+
 ## High-level flow
 
     Market data providers

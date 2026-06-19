@@ -443,6 +443,7 @@ Key documents:
     docs/positioning/reviewer_summary.md
     docs/positioning/project_status.md
     docs/architecture/platform_architecture.md
+    docs/architecture/platform_flow_diagram.md
     docs/contracts/README.md
     docs/contracts/product_api.md
     docs/operations/product_api_runbook.md
