@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 
+from app.api.v1.ask import router as ask_router
 from app.api.v1.assets import router as assets_router
 
 app = FastAPI(
@@ -14,6 +15,7 @@ app = FastAPI(
 )
 
 app.include_router(assets_router)
+app.include_router(ask_router)
 
 
 @app.get("/health")
