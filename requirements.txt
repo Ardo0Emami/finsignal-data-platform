@@ -11,3 +11,4 @@ dbt-snowflake
 pyspark
 pyarrow
 pandas
+httpx

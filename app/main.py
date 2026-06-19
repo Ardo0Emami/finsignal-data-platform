@@ -1,4 +1,8 @@
+from __future__ import annotations
+
 from fastapi import FastAPI
+
+from app.api.v1.assets import router as assets_router
 
 app = FastAPI(
     title="FinSignal Data Platform",
@@ -8,6 +12,8 @@ app = FastAPI(
     ),
     version="0.1.0",
 )
+
+app.include_router(assets_router)
 
 
 @app.get("/health")
