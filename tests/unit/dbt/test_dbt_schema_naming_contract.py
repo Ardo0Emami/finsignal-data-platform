@@ -19,8 +19,8 @@ def test_dbt_project_declares_layer_schemas() -> None:
     assert "+schema: MARTS" in project
 
 
-def test_dbt_profile_default_schema_remains_raw_for_sources() -> None:
-    profile = Path("dbt/profiles.yml").read_text(encoding="utf-8")
+def test_dbt_example_profile_default_schema_remains_raw_for_sources() -> None:
+    profile = Path("dbt/profiles.yml.example").read_text(encoding="utf-8")
 
     assert "FINSIGNAL_SNOWFLAKE_SCHEMA" in profile
     assert "'RAW'" in profile or '"RAW"' in profile
