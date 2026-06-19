@@ -433,6 +433,24 @@ Operational runbook:
 
     docs/operations/product_api_runbook.md
 
+
+## Project Documentation
+
+FinSignal includes supporting documentation for architecture, contracts, operations, cost control, and reviewer-facing positioning.
+
+Key documents:
+
+    docs/positioning/reviewer_summary.md
+    docs/architecture/platform_architecture.md
+    docs/contracts/README.md
+    docs/contracts/product_api.md
+    docs/operations/product_api_runbook.md
+    docs/operations/event-ingestion-runbook.md
+    docs/operations/cost_discipline.md
+    docs/operations/snowflake_trial_setup.md
+
+These documents explain what the platform does, how data flows through the system, which contracts downstream layers rely on, how to operate the API, and which cloud-cost-generating steps are intentionally explicit.
+
 ## Architecture Direction
 
 FinSignal is being built as a product-style data platform with clear responsibilities across:
