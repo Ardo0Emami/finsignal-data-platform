@@ -448,6 +448,7 @@ Key documents:
     docs/contracts/product_api.md
     docs/operations/product_api_runbook.md
     docs/operations/event-ingestion-runbook.md
+    docs/operations/reviewer_validation_checklist.md
     docs/operations/cost_discipline.md
     docs/operations/snowflake_trial_setup.md
 

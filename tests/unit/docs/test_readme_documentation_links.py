@@ -21,4 +21,5 @@ def test_readme_links_product_api_and_operations_docs() -> None:
     assert "docs/contracts/product_api.md" in content
     assert "docs/operations/product_api_runbook.md" in content
     assert "docs/operations/event-ingestion-runbook.md" in content
+    assert "docs/operations/reviewer_validation_checklist.md" in content
     assert "docs/operations/snowflake_trial_setup.md" in content
