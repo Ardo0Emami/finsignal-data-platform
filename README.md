@@ -441,6 +441,7 @@ FinSignal includes supporting documentation for architecture, contracts, operati
 Key documents:
 
     docs/positioning/reviewer_summary.md
+    docs/positioning/project_status.md
     docs/architecture/platform_architecture.md
     docs/contracts/README.md
     docs/contracts/product_api.md

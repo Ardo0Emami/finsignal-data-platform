@@ -8,6 +8,7 @@ def test_readme_links_core_project_documentation() -> None:
 
     assert "## Project Documentation" in content
     assert "docs/positioning/reviewer_summary.md" in content
+    assert "docs/positioning/project_status.md" in content
     assert "docs/architecture/platform_architecture.md" in content
     assert "docs/contracts/README.md" in content
     assert "docs/operations/cost_discipline.md" in content
